@@ -1,10 +1,12 @@
 // src/App.jsx
 //
 // Main application component for the Part 5 Blog List frontend.
-// This component handles user authentication and initializes the app.
+// This component handles user authentication, blog fetching, and displays the blog list.
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import loginService from './services/login'
+import blogService from './services/blogs'
+import Blog from './components/Blog'
 import './App.css'
 
 function App() {
@@ -16,6 +18,27 @@ function App() {
   // State for logged-in user information
   // When login succeeds, this will contain { username, name, token }
   const [user, setUser] = useState(null)
+
+  // State for storing the list of blogs fetched from the backend
+  // Initialized as an empty array, will be populated after login
+  const [blogs, setBlogs] = useState([])
+
+  /**
+   * useEffect hook that runs after the component mounts or when user changes.
+   * If a user is logged in, it fetches all blogs from the backend.
+   * This ensures the blog list is refreshed whenever the user logs in.
+   */
+  useEffect(() => {
+    // Only fetch blogs if a user is logged in
+    if (user) {
+      // Fetch all blogs from the backend
+      blogService.getAll().then((blogsData) => {
+        // Update the blogs state with the fetched data
+        setBlogs(blogsData)
+        console.log('Blogs fetched successfully:', blogsData)
+      })
+    }
+  }, [user]) // This effect depends on the user state - runs when user changes
 
   /**
    * Handles the login form submission.
@@ -36,6 +59,10 @@ function App() {
 
       // Store the user data (including authentication token) in state
       setUser(userData)
+
+      // Set the authorization token in the blogs service
+      // This ensures all blog API requests include the token in the Authorization header
+      blogService.setToken(userData.token)
 
       // Also store the token in localStorage so the user stays logged in after page refresh
       // The token will be sent with future API requests to authenticate the user
@@ -63,8 +90,7 @@ function App() {
   if (!user) {
     return (
       <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-        <h1>Blog List - Part 5</h1>
-        <h2>Login</h2>
+        <h2>Log in to application</h2>
 
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '10px' }}>
@@ -100,15 +126,24 @@ function App() {
   // If user is logged in, show the main app content
   return (
     <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px' }}>
-      <h1>Blog List - Part 5</h1>
-
       <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#e8f5e9' }}>
-        <p>Welcome, <strong>{user.name}</strong>!</p>
+        <p>{user.name} logged in</p>
         <button onClick={handleLogout}>Logout</button>
       </div>
 
-      <h2>Blogs</h2>
-      <p>Blog list component will be added here in future exercises.</p>
+      <h2>blogs</h2>
+
+      {/* Display blogs if any exist, otherwise show a message */}
+      {blogs.length > 0 ? (
+        <div>
+          {/* Map through each blog and render it using the Blog component */}
+          {blogs.map((blog) => (
+            <Blog key={blog.id} blog={blog} />
+          ))}
+        </div>
+      ) : (
+        <p>No blogs available yet.</p>
+      )}
     </div>
   )
 }
