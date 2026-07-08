@@ -19,6 +19,8 @@ function App() {
     setBlogs(initialBlogs);
   };
 
+  /*
+  // Disabled for Exercise 5.1 step1: do not persist login across reloads
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
     if (loggedUserJSON) {
@@ -28,7 +30,10 @@ function App() {
       void fetchBlogs();
     }
   }, []);
+  */
 
+  /*
+  // Disabled for Exercise 5.1 step1: do not persist login across reloads
   useEffect(() => {
     if (user) {
       window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
@@ -36,6 +41,7 @@ function App() {
       window.localStorage.removeItem("loggedBlogappUser");
     }
   }, [user]);
+  */
 
   const handleLogin = async (event) => {
     event.preventDefault();
