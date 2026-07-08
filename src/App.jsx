@@ -1,151 +1,158 @@
-// src/App.jsx
-//
-// Main application component for the Part 5 Blog List frontend.
-// This component handles user authentication, blog fetching, and displays the blog list.
-
-import { useState, useEffect } from 'react'
-import loginService from './services/login'
-import blogService from './services/blogs'
-import Blog from './components/Blog'
-import './App.css'
+import { useEffect, useState } from "react";
+import Blog from "./components/Blog";
+import blogService from "./services/blogs";
+import loginService from "./services/login";
+import "./App.css";
 
 function App() {
-  // State for login form inputs
-  // These hooks store the username and password entered by the user
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [blogs, setBlogs] = useState([]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [url, setUrl] = useState("");
+  const [user, setUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  // State for logged-in user information
-  // When login succeeds, this will contain { username, name, token }
-  const [user, setUser] = useState(null)
+  const fetchBlogs = async () => {
+    const initialBlogs = await blogService.getAll();
+    setBlogs(initialBlogs);
+  };
 
-  // State for storing the list of blogs fetched from the backend
-  // Initialized as an empty array, will be populated after login
-  const [blogs, setBlogs] = useState([])
-
-  /**
-   * useEffect hook that runs after the component mounts or when user changes.
-   * If a user is logged in, it fetches all blogs from the backend.
-   * This ensures the blog list is refreshed whenever the user logs in.
-   */
   useEffect(() => {
-    // Only fetch blogs if a user is logged in
+    const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
+    if (loggedUserJSON) {
+      const storedUser = JSON.parse(loggedUserJSON);
+      setUser(storedUser);
+      blogService.setToken(storedUser.token);
+      void fetchBlogs();
+    }
+  }, []);
+
+  useEffect(() => {
     if (user) {
-      // Fetch all blogs from the backend
-      blogService.getAll().then((blogsData) => {
-        // Update the blogs state with the fetched data
-        setBlogs(blogsData)
-        console.log('Blogs fetched successfully:', blogsData)
-      })
+      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+    } else {
+      window.localStorage.removeItem("loggedBlogappUser");
     }
-  }, [user]) // This effect depends on the user state - runs when user changes
+  }, [user]);
 
-  /**
-   * Handles the login form submission.
-   * Sends credentials to the backend via the login service.
-   * If successful, stores user data in state and localStorage.
-   */
   const handleLogin = async (event) => {
-    // Prevent default form submission behavior (page reload)
-    event.preventDefault()
-
+    event.preventDefault();
     try {
-      // Attempt to log in using the provided credentials
-      const userData = await loginService.login(username, password)
-
-      // Clear the form inputs after successful login
-      setUsername('')
-      setPassword('')
-
-      // Store the user data (including authentication token) in state
-      setUser(userData)
-
-      // Set the authorization token in the blogs service
-      // This ensures all blog API requests include the token in the Authorization header
-      blogService.setToken(userData.token)
-
-      // Also store the token in localStorage so the user stays logged in after page refresh
-      // The token will be sent with future API requests to authenticate the user
-      localStorage.setItem('bloglistToken', userData.token)
-
-      console.log('Login successful:', userData)
+      const userData = await loginService.login({ username, password });
+      setUser(userData);
+      blogService.setToken(userData.token);
+      setUsername("");
+      setPassword("");
+      await fetchBlogs();
     } catch (error) {
-      // If login fails, inform the user
-      console.error('Login error:', error)
-      alert('Invalid username or password')
+      console.error(
+        "Login structural error details:",
+        error.response?.data || error.message,
+      );
+
+      if (error.response?.status === 401) {
+        setErrorMessage("Wrong credentials");
+      } else {
+        setErrorMessage("Unable to reach the server");
+      }
+
+      setTimeout(() => setErrorMessage(null), 5000);
     }
-  }
+  };
 
-  /**
-   * Handles user logout.
-   * Clears user data from state and localStorage.
-   */
   const handleLogout = () => {
-    setUser(null)
-    localStorage.removeItem('bloglistToken')
-    console.log('User logged out')
-  }
+    setUser(null);
+    blogService.setToken(null);
+  };
 
-  // If user is not logged in, show the login form
+  const handleCreateBlog = async (event) => {
+    event.preventDefault();
+    try {
+      await blogService.create({ title, author, url });
+      setTitle("");
+      setAuthor("");
+      setUrl("");
+      await fetchBlogs();
+    } catch (error) {
+      console.error(
+        "Create blog error:",
+        error.response?.data || error.message,
+      );
+      setErrorMessage("Failed to create blog");
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
+
   if (!user) {
     return (
-      <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+      <div>
         <h2>Log in to application</h2>
 
+        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="username">Username: </label>
+          <div>
+            username
             <input
-              id="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              required
+              name="Username"
+              onChange={({ target }) => setUsername(target.value)}
             />
           </div>
-
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="password">Password: </label>
+          <div>
+            password
             <input
-              id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
+              name="Password"
+              onChange={({ target }) => setPassword(target.value)}
             />
           </div>
-
-          <button type="submit">Login</button>
+          <button type="submit">login</button>
         </form>
       </div>
-    )
+    );
   }
 
-  // If user is logged in, show the main app content
   return (
-    <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px' }}>
-      <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#e8f5e9' }}>
-        <p>{user.name} logged in</p>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-
+    <div>
       <h2>blogs</h2>
+      <p>{user.name} logged in</p>
+      <button type="button" onClick={handleLogout}>
+        logout
+      </button>
 
-      {/* Display blogs if any exist, otherwise show a message */}
-      {blogs.length > 0 ? (
+      <h3>create new</h3>
+      <form onSubmit={handleCreateBlog}>
         <div>
-          {/* Map through each blog and render it using the Blog component */}
-          {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} />
-          ))}
+          title
+          <input
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
+          />
         </div>
-      ) : (
-        <p>No blogs available yet.</p>
-      )}
+        <div>
+          author
+          <input
+            value={author}
+            onChange={({ target }) => setAuthor(target.value)}
+          />
+        </div>
+        <div>
+          url
+          <input value={url} onChange={({ target }) => setUrl(target.value)} />
+        </div>
+        <button type="submit">create</button>
+      </form>
+
+      {blogs.map((blog) => (
+        <Blog key={blog.id} blog={blog} />
+      ))}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
