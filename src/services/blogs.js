@@ -25,4 +25,14 @@ const create = async (newObject) => {
   return response.data;
 };
 
-export default { getAll, create, setToken };
+// Updates an existing blog entry by id
+const update = async (id, updatedObject) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  const response = await axios.put(`${baseUrl}/${id}`, updatedObject, config);
+  return response.data;
+};
+
+export default { getAll, create, update, setToken };

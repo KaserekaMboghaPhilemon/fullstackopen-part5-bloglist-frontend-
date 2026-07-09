@@ -117,6 +117,28 @@ function App() {
     }
   };
 
+  const handleLike = async (blogToLike) => {
+    try {
+      const updatedBlog = {
+        title: blogToLike.title,
+        author: blogToLike.author,
+        url: blogToLike.url,
+        likes: blogToLike.likes + 1,
+        user:
+          blogToLike.user && (blogToLike.user.id || blogToLike.user._id || blogToLike.user),
+      };
+
+      const returnedBlog = await blogService.update(blogToLike.id, updatedBlog);
+      setBlogs(
+        blogs.map((blog) =>
+          blog.id !== blogToLike.id ? blog : { ...returnedBlog, user: blogToLike.user },
+        ),
+      );
+    } catch (error) {
+      console.error("Like update failed:", error.response?.data || error.message);
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -166,7 +188,7 @@ function App() {
       </Togglable>
 
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} handleLike={() => handleLike(blog)} />
       ))}
     </div>
   );
