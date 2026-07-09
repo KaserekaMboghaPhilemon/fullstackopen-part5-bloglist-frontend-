@@ -19,36 +19,27 @@ function App() {
     setBlogs(initialBlogs);
   };
 
-  /*
-  // Disabled for Exercise 5.1 step1: do not persist login across reloads
+  // step5.2: restore the saved user session on first render
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
     if (loggedUserJSON) {
       const storedUser = JSON.parse(loggedUserJSON);
       setUser(storedUser);
-      blogService.setToken(storedUser.token);
-      void fetchBlogs();
+      blogService.setToken(storedUser.token); // Gives the token to our API service
+      fetchBlogs(); // Loads the blogs immediately for this authenticated session
     }
   }, []);
-  */
-
-  /*
-  // Disabled for Exercise 5.1 step1: do not persist login across reloads
-  useEffect(() => {
-    if (user) {
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-    } else {
-      window.localStorage.removeItem("loggedBlogappUser");
-    }
-  }, [user]);
-  */
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const userData = await loginService.login({ username, password });
-      setUser(userData);
-      blogService.setToken(userData.token);
+      const user = await loginService.login({ username, password });
+
+      // step5.2: save the logged-in user to browser storage
+      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+
+      setUser(user);
+      blogService.setToken(user.token);
       setUsername("");
       setPassword("");
       await fetchBlogs();
@@ -69,6 +60,9 @@ function App() {
   };
 
   const handleLogout = () => {
+    // step5.2: remove the saved session from browser storage
+    window.localStorage.removeItem("loggedBlogappUser");
+
     setUser(null);
     blogService.setToken(null);
   };
