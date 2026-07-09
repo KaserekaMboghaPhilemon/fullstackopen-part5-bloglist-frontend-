@@ -125,17 +125,24 @@ function App() {
         url: blogToLike.url,
         likes: blogToLike.likes + 1,
         user:
-          blogToLike.user && (blogToLike.user.id || blogToLike.user._id || blogToLike.user),
+          blogToLike.user &&
+          (blogToLike.user.id || blogToLike.user._id || blogToLike.user),
       };
 
       const returnedBlog = await blogService.update(blogToLike.id, updatedBlog);
+      const blogWithUser =
+        returnedBlog.user && returnedBlog.user.name
+          ? returnedBlog
+          : { ...returnedBlog, user: blogToLike.user };
+
       setBlogs(
-        blogs.map((blog) =>
-          blog.id !== blogToLike.id ? blog : { ...returnedBlog, user: blogToLike.user },
-        ),
+        blogs.map((blog) => (blog.id !== blogToLike.id ? blog : blogWithUser)),
       );
     } catch (error) {
-      console.error("Like update failed:", error.response?.data || error.message);
+      console.error(
+        "Like update failed:",
+        error.response?.data || error.message,
+      );
     }
   };
 
