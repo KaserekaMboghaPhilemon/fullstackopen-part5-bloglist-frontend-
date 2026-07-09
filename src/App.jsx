@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Blog from "./components/Blog";
+import Notification from "./components/Notification";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import "./App.css";
@@ -12,7 +13,7 @@ function App() {
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
   const [user, setUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const fetchBlogs = async () => {
     const initialBlogs = await blogService.getAll();
@@ -42,20 +43,32 @@ function App() {
       blogService.setToken(user.token);
       setUsername("");
       setPassword("");
+
+      setNotification({
+        text: `${user.name} logged in`,
+        type: "success",
+      });
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+
       await fetchBlogs();
     } catch (error) {
       console.error(
-        "Login structural error details:",
+        "Login error details:",
         error.response?.data || error.message,
       );
 
-      if (error.response?.status === 401) {
-        setErrorMessage("Wrong credentials");
-      } else {
-        setErrorMessage("Unable to reach the server");
-      }
+      // Set notification state with error type
+      setNotification({
+        text: "wrong username or password",
+        type: "error",
+      });
 
-      setTimeout(() => setErrorMessage(null), 5000);
+      // Wipes out notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
     }
   };
 
@@ -76,17 +89,35 @@ function App() {
       // Concatenate the newly returned blog object directly into the active UI state array
       setBlogs(blogs.concat(newBlog));
 
+      // Set success notification message
+      setNotification({
+        text: `a new blog ${newBlog.title} by ${newBlog.author} added`,
+        type: "success",
+      });
+
       // Clear the text input fields completely on successful addition
       setTitle("");
       setAuthor("");
       setUrl("");
+
+      // Wipe out notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
     } catch (error) {
       console.error(
         "Create blog error:",
         error.response?.data || error.message,
       );
-      setErrorMessage("Failed to create blog");
-      setTimeout(() => setErrorMessage(null), 5000);
+
+      setNotification({
+        text: "Failed to create blog entry",
+        type: "error",
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
     }
   };
 
@@ -95,7 +126,7 @@ function App() {
       <div>
         <h2>Log in to application</h2>
 
-        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+        {notification && <Notification messageObj={notification} />}
 
         <form onSubmit={handleLogin}>
           <div>
@@ -125,6 +156,9 @@ function App() {
   return (
     <div>
       <h2>blogs</h2>
+
+      <Notification messageObj={notification} />
+
       <p>{user.name} logged in</p>
       <button type="button" onClick={handleLogout}>
         logout
