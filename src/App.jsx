@@ -70,11 +70,16 @@ function App() {
   const handleCreateBlog = async (event) => {
     event.preventDefault();
     try {
-      await blogService.create({ title, author, url });
+      // Send the data to the backend via our service
+      const newBlog = await blogService.create({ title, author, url });
+
+      // Concatenate the newly returned blog object directly into the active UI state array
+      setBlogs(blogs.concat(newBlog));
+
+      // Clear the text input fields completely on successful addition
       setTitle("");
       setAuthor("");
       setUrl("");
-      await fetchBlogs();
     } catch (error) {
       console.error(
         "Create blog error:",
@@ -130,20 +135,29 @@ function App() {
         <div>
           title
           <input
+            type="text"
             value={title}
+            name="Title"
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
         <div>
           author
           <input
+            type="text"
             value={author}
+            name="Author"
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
         <div>
           url
-          <input value={url} onChange={({ target }) => setUrl(target.value)} />
+          <input
+            type="text"
+            value={url}
+            name="Url"
+            onChange={({ target }) => setUrl(target.value)}
+          />
         </div>
         <button type="submit">create</button>
       </form>
