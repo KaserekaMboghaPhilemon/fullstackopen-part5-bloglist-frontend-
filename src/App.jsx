@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import Blog from "./components/Blog";
+import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
@@ -10,9 +11,6 @@ function App() {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
   const [user, setUser] = useState(null);
   const [notification, setNotification] = useState(null);
   const blogFormRef = useRef();
@@ -82,33 +80,24 @@ function App() {
     blogService.setToken(null);
   };
 
-  const handleCreateBlog = async (event) => {
-    event.preventDefault();
+  const createBlog = async (blogObject) => {
     try {
-      // Send the data to the backend via our service
-      const newBlog = await blogService.create({ title, author, url });
-
-      // Concatenate the newly returned blog object directly into the active UI state array
+      const newBlog = await blogService.create(blogObject);
       setBlogs(blogs.concat(newBlog));
+
       // Automatically collapses the Togglable form container
       blogFormRef.current && blogFormRef.current.toggleVisibility();
 
-      // Set success notification message
       setNotification({
         text: `a new blog ${newBlog.title} by ${newBlog.author} added`,
         type: "success",
       });
 
-      // Clear the text input fields completely on successful addition
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      setBlogFormVisible(false);
-
-      // Wipe out notification after 5 seconds
       setTimeout(() => {
         setNotification(null);
       }, 5000);
+
+      return newBlog;
     } catch (error) {
       console.error(
         "Create blog error:",
@@ -123,6 +112,8 @@ function App() {
       setTimeout(() => {
         setNotification(null);
       }, 5000);
+
+      throw error;
     }
   };
 
@@ -171,36 +162,7 @@ function App() {
 
       <h3>create new</h3>
       <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <form onSubmit={handleCreateBlog}>
-          <div>
-            title
-            <input
-              type="text"
-              value={title}
-              name="Title"
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          </div>
-          <div>
-            author
-            <input
-              type="text"
-              value={author}
-              name="Author"
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </div>
-          <div>
-            url
-            <input
-              type="text"
-              value={url}
-              name="Url"
-              onChange={({ target }) => setUrl(target.value)}
-            />
-          </div>
-          <button type="submit">create</button>
-        </form>
+        <BlogForm createBlog={createBlog} />
       </Togglable>
 
       {blogs.map((blog) => (
