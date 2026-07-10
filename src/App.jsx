@@ -146,6 +146,20 @@ function App() {
     }
   };
 
+  const handleDelete = async (blogToDelete) => {
+    try {
+      const ok = window.confirm(
+        `Remove blog ${blogToDelete.title} by ${blogToDelete.author}?`,
+      );
+      if (!ok) return;
+
+      await blogService.remove(blogToDelete.id);
+      setBlogs(blogs.filter((b) => b.id !== blogToDelete.id));
+    } catch (error) {
+      console.error("Delete failed:", error.response?.data || error.message);
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -197,7 +211,13 @@ function App() {
       </Togglable>
 
       {blogsSorted.map((blog) => (
-        <Blog key={blog.id} blog={blog} handleLike={() => handleLike(blog)} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          handleLike={() => handleLike(blog)}
+          handleDelete={() => handleDelete(blog)}
+          currentUser={user}
+        />
       ))}
     </div>
   );
