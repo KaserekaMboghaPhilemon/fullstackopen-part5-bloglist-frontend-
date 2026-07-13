@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import Blog from "./Blog";
 
 describe("<Blog />", () => {
@@ -55,5 +55,35 @@ describe("<Blog />", () => {
     expect(screen.getByText(blog.url)).toBeInTheDocument();
     expect(screen.getByText(/likes 42/i)).toBeInTheDocument();
     expect(screen.getByText(/Test User/i)).toBeInTheDocument();
+  });
+
+  test("like button is clicked twice and handler is called twice", async () => {
+    const blog = {
+      title: "A test blog",
+      author: "Test Writer",
+      url: "https://example.com/blog",
+      likes: 42,
+      user: { name: "Test User" },
+    };
+
+    const mockHandleLike = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <Blog
+        blog={blog}
+        handleLike={mockHandleLike}
+        handleDelete={() => {}}
+        currentUser={null}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /view/i }));
+    const likeButton = screen.getByRole("button", { name: /like/i });
+
+    await user.click(likeButton);
+    await user.click(likeButton);
+
+    expect(mockHandleLike).toHaveBeenCalledTimes(2);
   });
 });
