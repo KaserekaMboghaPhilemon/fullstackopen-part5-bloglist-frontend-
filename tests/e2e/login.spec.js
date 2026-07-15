@@ -71,7 +71,7 @@ describe("When logged in", () => {
       page
         .locator(".blog-summary")
         .filter({ hasText: /E2E Testing with Playwright/i })
-        .filter({ hasText: /Kasereka Philemon/i })-----
+        .filter({ hasText: /Kasereka Philemon/i })
         .first(),
     ).toBeVisible();
   });
@@ -115,6 +115,78 @@ describe("When logged in", () => {
       .first()
       .click();
     await expect(details).toContainText("likes 1");
+  });
+
+  test("blogs are sorted by likes descending", async ({ page }) => {
+    const mostLikedTitle = `Most liked ${Date.now()}`;
+    const lessLikedTitle = `Less liked ${Date.now()}`;
+
+    const openFormButton = page.getByRole("button", {
+      name: /create new blog/i,
+    });
+
+    if (await openFormButton.isVisible()) {
+      await openFormButton.click();
+    }
+
+    await page.locator('input[name="Title"]').fill(mostLikedTitle);
+    await page.locator('input[name="Author"]').fill("Playwright User");
+    await page.locator('input[name="Url"]').fill("https://example.com/most");
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    if (await openFormButton.isVisible()) {
+      await openFormButton.click();
+    }
+
+    await page.locator('input[name="Title"]').fill(lessLikedTitle);
+    await page.locator('input[name="Author"]').fill("Playwright User");
+    await page.locator('input[name="Url"]').fill("https://example.com/less");
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    const mostLikedCard = page
+      .locator(".blog-summary")
+      .filter({ hasText: mostLikedTitle })
+      .first();
+    const lessLikedCard = page
+      .locator(".blog-summary")
+      .filter({ hasText: lessLikedTitle })
+      .first();
+
+    await expect(mostLikedCard).toBeVisible();
+    await expect(lessLikedCard).toBeVisible();
+
+    await mostLikedCard.getByRole("button", { name: /view/i }).click();
+    await page
+      .getByRole("button", { name: /^like$/i })
+      .first()
+      .click();
+    await page
+      .getByRole("button", { name: /^like$/i })
+      .first()
+      .click();
+
+    await lessLikedCard.getByRole("button", { name: /view/i }).click();
+    await page
+      .getByRole("button", { name: /^like$/i })
+      .nth(1)
+      .click();
+
+    const order = await page.evaluate(
+      ({ mostLikedTitle, lessLikedTitle }) => {
+        const cards = Array.from(document.querySelectorAll(".blog-summary"));
+        const firstIndex = cards.findIndex((card) =>
+          card.textContent.includes(mostLikedTitle),
+        );
+        const secondIndex = cards.findIndex((card) =>
+          card.textContent.includes(lessLikedTitle),
+        );
+
+        return { firstIndex, secondIndex };
+      },
+      { mostLikedTitle, lessLikedTitle },
+    );
+
+    expect(order.firstIndex).toBeLessThan(order.secondIndex);
   });
 
   test("a blog can be deleted by its creator", async ({ page }) => {
