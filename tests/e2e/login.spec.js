@@ -154,4 +154,33 @@ describe("When logged in", () => {
 
     await expect(blogCard).not.toBeVisible();
   });
+
+  test("only the creator can see the delete button", async ({ page }) => {
+    const title = `Delete visibility ${Date.now()}`;
+    const author = "Playwright User";
+
+    const openFormButton = page.getByRole("button", {
+      name: /create new blog/i,
+    });
+    if (await openFormButton.isVisible()) {
+      await openFormButton.click();
+    }
+
+    await page.locator('input[name="Title"]').fill(title);
+    await page.locator('input[name="Author"]').fill(author);
+    await page.locator('input[name="Url"]').fill("https://example.com");
+
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    const blogCard = page
+      .locator(".blog-summary")
+      .filter({ hasText: title })
+      .filter({ hasText: author })
+      .first();
+
+    await expect(blogCard).toBeVisible();
+    await blogCard.getByRole("button", { name: /view/i }).click();
+
+    await expect(page.getByRole("button", { name: /^remove$/i })).toBeVisible();
+  });
 });
