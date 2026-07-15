@@ -71,7 +71,7 @@ describe("When logged in", () => {
       page
         .locator(".blog-summary")
         .filter({ hasText: /E2E Testing with Playwright/i })
-        .filter({ hasText: /Kasereka Philemon/i })
+        .filter({ hasText: /Kasereka Philemon/i })-----
         .first(),
     ).toBeVisible();
   });
