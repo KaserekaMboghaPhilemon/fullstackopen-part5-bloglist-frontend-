@@ -116,4 +116,42 @@ describe("When logged in", () => {
       .click();
     await expect(details).toContainText("likes 1");
   });
+
+  test("a blog can be deleted by its creator", async ({ page }) => {
+    const title = `Delete test ${Date.now()}`;
+    const author = "Playwright User";
+
+    const openFormButton = page.getByRole("button", {
+      name: /create new blog/i,
+    });
+    if (await openFormButton.isVisible()) {
+      await openFormButton.click();
+    }
+
+    await page.locator('input[name="Title"]').fill(title);
+    await page.locator('input[name="Author"]').fill(author);
+    await page.locator('input[name="Url"]').fill("https://example.com");
+
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    const blogCard = page
+      .locator(".blog-summary")
+      .filter({ hasText: title })
+      .filter({ hasText: author })
+      .first();
+
+    await expect(blogCard).toBeVisible();
+    await blogCard.getByRole("button", { name: /view/i }).click();
+
+    const removeButton = page.getByRole("button", { name: /^remove$/i });
+    await expect(removeButton).toBeVisible();
+
+    page.once("dialog", async (dialog) => {
+      await dialog.accept();
+    });
+
+    await removeButton.click();
+
+    await expect(blogCard).not.toBeVisible();
+  });
 });

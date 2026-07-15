@@ -82,14 +82,14 @@ function App() {
 
   const createBlog = async (blogObject) => {
     try {
-      const newBlog = await blogService.create(blogObject);
-      setBlogs(blogs.concat(newBlog));
+      await blogService.create(blogObject);
+      await fetchBlogs();
 
       // Automatically collapses the Togglable form container
       blogFormRef.current && blogFormRef.current.toggleVisibility();
 
       setNotification({
-        text: `a new blog ${newBlog.title} by ${newBlog.author} added`,
+        text: `a new blog ${blogObject.title} by ${blogObject.author} added`,
         type: "success",
       });
 
