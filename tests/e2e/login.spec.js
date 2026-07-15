@@ -69,8 +69,51 @@ describe("When logged in", () => {
 
     await expect(
       page
-        .getByText(/E2E Testing with Playwright/i)
-        .filter({ hasText: /Kasereka Philemon/i }),
+        .locator(".blog-summary")
+        .filter({ hasText: /E2E Testing with Playwright/i })
+        .filter({ hasText: /Kasereka Philemon/i })
+        .first(),
     ).toBeVisible();
+  });
+
+  test("a blog can be liked", async ({ page }) => {
+    const title = `Like test ${Date.now()}`;
+    const author = "Playwright User";
+
+    const openFormButton = page.getByRole("button", {
+      name: /create new blog/i,
+    });
+    if (await openFormButton.isVisible()) {
+      await openFormButton.click();
+    }
+
+    await page.locator('input[name="Title"]').fill(title);
+    await page.locator('input[name="Author"]').fill(author);
+    await page.locator('input[name="Url"]').fill("https://example.com");
+
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    const blogCard = page
+      .locator(".blog-summary")
+      .filter({ hasText: title })
+      .filter({ hasText: author })
+      .first();
+
+    await expect(blogCard).toBeVisible();
+    await blogCard.getByRole("button", { name: /view/i }).click();
+
+    const details = page
+      .locator("div")
+      .filter({ hasText: /likes/i })
+      .filter({ hasText: title })
+      .first();
+
+    await expect(details).toContainText("likes 0");
+
+    await page
+      .getByRole("button", { name: /^like$/i })
+      .first()
+      .click();
+    await expect(details).toContainText("likes 1");
   });
 });
