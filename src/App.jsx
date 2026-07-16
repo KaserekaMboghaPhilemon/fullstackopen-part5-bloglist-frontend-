@@ -1,5 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Blog from "./components/Blog";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
@@ -7,6 +14,44 @@ import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import "./App.css";
+
+function BlogView({ blogs, user, onLike, onDelete }) {
+  const { id } = useParams();
+  const blog = blogs.find((blog) => blog.id === id);
+
+  if (!blog) {
+    return <div>Blog not found</div>;
+  }
+
+  return (
+    <div>
+      <h2>
+        {blog.title} {blog.author}
+      </h2>
+      <div>
+        <a href={blog.url} target="_blank" rel="noreferrer">
+          {blog.url}
+        </a>
+      </div>
+      <div>
+        likes {blog.likes}
+        {user && (
+          <button type="button" onClick={() => onLike(blog)}>
+            like
+          </button>
+        )}
+      </div>
+      <div>Added by {blog.user?.name}</div>
+      {blog.user && user && blog.user.username === user.username && (
+        <div>
+          <button type="button" onClick={() => onDelete(blog)}>
+            remove
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [blogs, setBlogs] = useState([]);
@@ -218,6 +263,17 @@ function App() {
           }
         />
         <Route
+          path="/blogs/:id"
+          element={
+            <BlogView
+              blogs={blogs}
+              user={user}
+              onLike={handleLike}
+              onDelete={handleDelete}
+            />
+          }
+        />
+        <Route
           path="/"
           element={
             <div>
@@ -232,15 +288,11 @@ function App() {
                 </>
               )}
 
-              {blogsSorted.map((blog) => (
-                <Blog
-                  key={blog.id}
-                  blog={blog}
-                  handleLike={() => handleLike(blog)}
-                  handleDelete={() => handleDelete(blog)}
-                  currentUser={user}
-                />
-              ))}
+              <ul>
+                {blogsSorted.map((blog) => (
+                  <Blog key={blog.id} blog={blog} />
+                ))}
+              </ul>
             </div>
           }
         />

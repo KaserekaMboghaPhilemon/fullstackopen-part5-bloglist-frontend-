@@ -17,6 +17,7 @@ const getAll = async () => {
 
 // Adds the new create function with custom authorization headers
 const create = async (newObject) => {
+
   const config = {
     headers: { Authorization: token },
   };
