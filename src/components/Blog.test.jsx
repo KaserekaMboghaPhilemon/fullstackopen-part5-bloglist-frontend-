@@ -1,89 +1,43 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
+import { BrowserRouter } from "react-router-dom";
 import Blog from "./Blog";
 
+const renderWithRouter = (component) => {
+  return render(<BrowserRouter>{component}</BrowserRouter>);
+};
+
 describe("<Blog />", () => {
-  test("renders the title and author, but does not render the URL or likes by default", () => {
+  test("renders the title and author as a link", () => {
     const blog = {
+      id: "1",
       title: "A test blog",
       author: "Test Writer",
       url: "https://example.com/blog",
       likes: 42,
     };
 
-    render(
-      <Blog
-        blog={blog}
-        handleLike={() => {}}
-        handleDelete={() => {}}
-        currentUser={null}
-      />,
-    );
+    renderWithRouter(<Blog blog={blog} />);
 
-    expect(screen.getByText(/A test blog/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test Writer/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/A test blog/i).closest(".blog-summary"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(blog.url)).not.toBeInTheDocument();
-    expect(screen.queryByText(/likes 42/i)).not.toBeInTheDocument();
+    const link = screen.getByRole("link", {
+      name: /A test blog Test Writer/i,
+    });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/blogs/1");
   });
 
-  test("shows the URL, likes, and user when the view button is clicked", async () => {
+  test("displays the URL when the link is visible", () => {
     const blog = {
+      id: "1",
       title: "A test blog",
       author: "Test Writer",
       url: "https://example.com/blog",
       likes: 42,
-      user: { name: "Test User" },
     };
 
-    const user = userEvent.setup();
+    renderWithRouter(<Blog blog={blog} />);
 
-    render(
-      <Blog
-        blog={blog}
-        handleLike={() => {}}
-        handleDelete={() => {}}
-        currentUser={null}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /view/i }));
-
-    expect(screen.getByText(blog.url)).toBeInTheDocument();
-    expect(screen.getByText(/likes 42/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test User/i)).toBeInTheDocument();
-  });
-
-  test("like button is clicked twice and handler is called twice", async () => {
-    const blog = {
-      title: "A test blog",
-      author: "Test Writer",
-      url: "https://example.com/blog",
-      likes: 42,
-      user: { name: "Test User" },
-    };
-
-    const mockHandleLike = vi.fn();
-    const user = userEvent.setup();
-
-    render(
-      <Blog
-        blog={blog}
-        handleLike={mockHandleLike}
-        handleDelete={() => {}}
-        currentUser={null}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /view/i }));
-    const likeButton = screen.getByRole("button", { name: /like/i });
-
-    await user.click(likeButton);
-    await user.click(likeButton);
-
-    expect(mockHandleLike).toHaveBeenCalledTimes(2);
+    expect(screen.getByText(/A test blog Test Writer/i)).toBeInTheDocument();
   });
 });

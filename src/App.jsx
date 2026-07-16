@@ -8,6 +8,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Blog from "./components/Blog";
+import BlogView from "./components/BlogView";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Notification from "./components/Notification";
@@ -202,37 +203,12 @@ const App = () => {
           path="/blogs/:id"
           element={
             matchedBlog ? (
-              <div style={{ marginTop: "20px" }}>
-                <h2>{matchedBlog.title}</h2>
-                <div style={{ marginBottom: "8px" }}>
-                  <a href={matchedBlog.url} target="_blank" rel="noreferrer">
-                    {matchedBlog.url}
-                  </a>
-                </div>
-                <div style={{ marginBottom: "8px" }}>
-                  likes {matchedBlog.likes}{" "}
-                  {/* Like button is visible only when a user is logged in */}
-                  {user && (
-                    <button onClick={() => handleLike(matchedBlog.id)}>
-                      like
-                    </button>
-                  )}
-                </div>
-                <div style={{ marginBottom: "15px" }}>
-                  Added by{" "}
-                  {matchedBlog.user
-                    ? matchedBlog.user.name
-                    : matchedBlog.author}
-                </div>
-                {/* Delete button only shows if logged-in user matches the creator */}
-                {user &&
-                  matchedBlog.user &&
-                  user.username === matchedBlog.user.username && (
-                    <button onClick={() => handleRemove(matchedBlog.id)}>
-                      remove
-                    </button>
-                  )}
-              </div>
+              <BlogView
+                blog={matchedBlog}
+                user={user}
+                onLike={handleLike}
+                onDelete={handleRemove}
+              />
             ) : (
               <p>Blog not found</p>
             )
