@@ -7,6 +7,7 @@ import {
   useNavigate,
   Navigate,
 } from "react-router-dom";
+import styled from "styled-components";
 import Blog from "./components/Blog";
 import BlogView from "./components/BlogView";
 import blogService from "./services/blogs";
@@ -14,6 +15,150 @@ import loginService from "./services/login";
 import Notification from "./components/Notification";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
+
+const Container = styled.div`
+  text-align: left;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+`;
+
+const Nav = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  a,
+  button {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+  }
+
+  button {
+    background: rgba(255, 255, 255, 0.1);
+    margin-left: auto;
+  }
+`;
+
+const Heading = styled.h2`
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 32px;
+  font-weight: 600;
+`;
+
+const FormContainer = styled.div`
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: 0 auto;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const Input = styled.input`
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  &:hover {
+    border-color: #d0d0d0;
+  }
+`;
+
+const Button = styled.button`
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const BlogList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+
+  li {
+    margin-bottom: 12px;
+
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 12px 16px;
+      display: block;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      border-left: 4px solid #667eea;
+      padding-left: 12px;
+
+      &:hover {
+        background: #f5f5f5;
+        transform: translateX(4px);
+      }
+    }
+  }
+`;
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -147,26 +292,10 @@ const App = () => {
     ? blogs.find((b) => b.id === match.params.id)
     : null;
 
-  // Common Styles for exact matches with Course screenshots
-  const navStyle = {
-    background: "#eeeeee",
-    padding: "10px",
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-    marginBottom: "15px",
-  };
-
-  const containerStyle = {
-    textAlign: "left",
-    fontFamily: "sans-serif",
-    padding: "10px",
-  };
-
   return (
-    <div style={containerStyle}>
+    <Container>
       {/* 1. Standard Navigation Bar */}
-      <div style={navStyle}>
+      <Nav>
         <Link to="/">blogs</Link>
         {user ? (
           <>
@@ -176,9 +305,9 @@ const App = () => {
         ) : (
           <Link to="/login">login</Link>
         )}
-      </div>
+      </Nav>
 
-      <h2>blogs</h2>
+      <Heading>blogs</Heading>
       <Notification message={notification} type={notificationType} />
 
       <Routes>
@@ -187,16 +316,16 @@ const App = () => {
           path="/"
           element={
             <div>
-              <ul style={{ paddingLeft: "20px", marginTop: "15px" }}>
+              <BlogList>
                 {blogs.map((blog) => (
-                  <li key={blog.id} style={{ marginBottom: "5px" }}>
+                  <li key={blog.id}>
                     {/* Link wraps the entire title and author string */}
                     <Link to={`/blogs/${blog.id}`}>
                       {blog.title} {blog.author}
                     </Link>
                   </li>
                 ))}
-              </ul>
+              </BlogList>
             </div>
           }
         />
@@ -207,7 +336,7 @@ const App = () => {
           element={
             user ? (
               <div>
-                <h2>Create a new blog</h2>
+                <Heading>Create a new blog</Heading>
                 <BlogForm createBlog={addBlog} />
               </div>
             ) : (
@@ -237,34 +366,36 @@ const App = () => {
         <Route
           path="/login"
           element={
-            <div>
-              <h2>Log in to application</h2>
+            <FormContainer>
+              <Heading>Log in to application</Heading>
               <form onSubmit={handleLogin}>
-                <div>
-                  username
-                  <input
+                <FormGroup>
+                  <Label>username</Label>
+                  <Input
                     type="text"
                     value={username}
                     name="Username"
                     onChange={({ target }) => setUsername(target.value)}
+                    placeholder="Enter your username"
                   />
-                </div>
-                <div>
-                  password
-                  <input
+                </FormGroup>
+                <FormGroup>
+                  <Label>password</Label>
+                  <Input
                     type="password"
                     value={password}
                     name="Password"
                     onChange={({ target }) => setPassword(target.value)}
+                    placeholder="Enter your password"
                   />
-                </div>
-                <button type="submit">login</button>
+                </FormGroup>
+                <Button type="submit">login</Button>
               </form>
-            </div>
+            </FormContainer>
           }
         />
       </Routes>
-    </div>
+    </Container>
   );
 };
 
