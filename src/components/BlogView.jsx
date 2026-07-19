@@ -29,13 +29,18 @@ function BlogView({ blog, user, onLike, onDelete }) {
         )}
       </div>
       <div>Added by {blog.user?.name}</div>
-      {blog.user && user && blog.user.username === user.username && (
-        <div>
-          <button type="button" onClick={() => onDelete(blog)}>
-            remove
-          </button>
-        </div>
-      )}
+      {user &&
+        ((blog.user &&
+          typeof blog.user === "object" &&
+          blog.user.username === user.username) ||
+          (typeof blog.user === "string" && blog.user === user.id) ||
+          (typeof blog.user === "string" && blog.user === user.username)) && (
+          <div>
+            <button type="button" onClick={() => onDelete(blog)}>
+              remove
+            </button>
+          </div>
+        )}
     </div>
   );
 }

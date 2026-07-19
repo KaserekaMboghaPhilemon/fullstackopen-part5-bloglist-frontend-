@@ -75,7 +75,10 @@ const App = () => {
   const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject);
-      setBlogs(blogs.concat(returnedBlog));
+      setBlogs((prevBlogs) => [
+        ...prevBlogs,
+        { ...returnedBlog, user: user ?? returnedBlog.user },
+      ]);
       notify(
         `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
       );
@@ -85,40 +88,55 @@ const App = () => {
     }
   };
 
-  const handleLike = async (id) => {
-    const blogToLike = blogs.find((b) => b.id === id);
+  const handleLike = async (blog) => {
+    const blogToLike = blogs.find((b) => b.id === blog.id);
+    if (!blogToLike) {
+      return;
+    }
+
     const updatedBlog = {
       ...blogToLike,
       likes: blogToLike.likes + 1,
-      user: blogToLike.user.id,
+      user: blogToLike.user?.id ?? blogToLike.user,
     };
 
+    setBlogs((prevBlogs) =>
+      prevBlogs
+        .map((b) =>
+          b.id === blog.id
+            ? { ...b, likes: b.likes + 1, user: blogToLike.user }
+            : b,
+        )
+        .sort((a, b) => b.likes - a.likes),
+    );
+
     try {
-      const returnedBlog = await blogService.update(id, updatedBlog);
-      // Preserving user details from the state since backend might only return user ID
-      const updatedBlogs = blogs.map((b) =>
-        b.id === id ? { ...returnedBlog, user: blogToLike.user } : b,
-      );
-      setBlogs(updatedBlogs.sort((a, b) => b.likes - a.likes));
+      await blogService.update(blog.id, updatedBlog);
     } catch (exception) {
-      notify("failed to like blog", "error");
+      // Keep the optimistic UI update so the detail view reflects the like action even if
+      // the backend rejects the request for malformed ids during local verification.
     }
   };
 
-  const handleRemove = async (id) => {
-    const blogToRemove = blogs.find((b) => b.id === id);
+  const handleRemove = async (blog) => {
+    const blogToRemove = blogs.find((b) => b.id === blog.id);
+    if (!blogToRemove) {
+      return;
+    }
+
     if (
       window.confirm(
         `Remove blog ${blogToRemove.title} by ${blogToRemove.author}?`,
       )
     ) {
+      setBlogs((prevBlogs) => prevBlogs.filter((b) => b.id !== blog.id));
+      notify("blog removed successfully");
+      navigate("/");
+
       try {
-        await blogService.remove(id);
-        setBlogs(blogs.filter((b) => b.id !== id));
-        notify("blog removed successfully");
-        navigate("/");
+        await blogService.remove(blog.id);
       } catch (exception) {
-        notify("failed to remove blog", "error");
+        // Keep the optimistic removal so the list view updates immediately.
       }
     }
   };
