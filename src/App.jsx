@@ -28,34 +28,46 @@ const Container = styled.div`
 
 const Nav = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 15px 20px;
+  padding: 16px 24px;
   display: flex;
-  gap: 15px;
+  gap: 20px;
   align-items: center;
   margin-bottom: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 
   a,
   button {
     color: white;
     text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 10px 18px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
     transition: all 0.3s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       transform: translateY(-2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
   button {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     margin-left: auto;
+    margin-right: 0;
+  }
+
+  button:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 `;
 

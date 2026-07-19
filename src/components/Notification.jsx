@@ -6,12 +6,16 @@ const NotificationContainer = styled.div`
   margin-bottom: 20px;
   border-radius: 8px;
   font-weight: 500;
-  animation: slideIn 0.3s ease-out;
+  font-size: 15px;
+  line-height: 1.5;
+  animation: slideInDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid;
 
-  @keyframes slideIn {
+  @keyframes slideInDown {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-20px);
     }
     to {
       opacity: 1;
@@ -22,13 +26,13 @@ const NotificationContainer = styled.div`
   ${(props) =>
     props.type === "error"
       ? `
-    background: #fee2e2;
-    border: 2px solid #ef4444;
+    background: #fef2f2;
+    border-color: #dc2626;
     color: #991b1b;
   `
       : `
-    background: #dcfce7;
-    border: 2px solid #22c55e;
+    background: #f0fdf4;
+    border-color: #16a34a;
     color: #166534;
   `}
 `;
