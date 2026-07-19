@@ -1,95 +1,118 @@
 import styled from "styled-components";
 
 const BlogContainer = styled.div`
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+  width: 100%;
+  max-width: 720px;
   margin: 0 auto;
-  text-align: left;
+  padding: 24px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+`;
+
+const BlogHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 22px;
 `;
 
 const BlogTitle = styled.h2`
-  color: #333;
-  margin-bottom: 20px;
-  font-size: 28px;
-  font-weight: 600;
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.05;
+  color: #111827;
 `;
 
-const BlogInfo = styled.div`
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
+const BlogAuthor = styled.p`
+  margin: 0;
+  color: #4b5563;
+  font-size: 15px;
 `;
 
 const BlogUrl = styled.a`
-  color: #667eea;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 22px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #2563eb;
+  font-weight: 600;
   text-decoration: none;
-  word-break: break-all;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
-    color: #764ba2;
-    text-decoration: underline;
+    background: #e0e7ff;
+    transform: translateY(-1px);
   }
 `;
 
-const LikesSection = styled.div`
+const BlogMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+`;
+
+const LikesInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  color: #111827;
+  font-size: 15px;
 `;
 
-const AuthorSection = styled.div`
-  margin-bottom: 20px;
+const AuthorSection = styled.p`
+  margin: 0;
+  color: #6b7280;
   font-size: 14px;
-  color: #666;
   font-style: italic;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 `;
 
 const ActionButton = styled.button`
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 
   ${(props) =>
-    props.variant === "danger"
+    props.$variant === "danger"
       ? `
-    background: #ef4444;
-    color: white;
+    background: transparent;
+    border-color: #ef4444;
+    color: #ef4444;
 
     &:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      background: #fee2e2;
+      transform: translateY(-1px);
     }
   `
       : `
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: transparent;
+    border-color: #3b82f6;
+    color: #2563eb;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      background: #dbeafe;
+      transform: translateY(-1px);
     }
   `}
 `;
@@ -109,38 +132,41 @@ function BlogView({ blog, user, onLike, onDelete }) {
 
   return (
     <BlogContainer>
-      <BlogTitle>
-        {blog.title} {blog.author}
-      </BlogTitle>
+      <BlogHeader>
+        <BlogTitle>{blog.title}</BlogTitle>
+        <BlogAuthor>by {blog.author}</BlogAuthor>
+      </BlogHeader>
 
-      <BlogInfo>
-        <BlogUrl href={blog.url} target="_blank" rel="noreferrer">
-          {blog.url}
-        </BlogUrl>
-      </BlogInfo>
+      <BlogUrl href={blog.url} target="_blank" rel="noreferrer">
+        {blog.url}
+      </BlogUrl>
 
-      <LikesSection>
-        likes {blog.likes}
-        {user && (
-          <ActionButton type="button" onClick={() => onLike(blog)}>
-            like
-          </ActionButton>
+      <BlogMeta>
+        <LikesInfo>
+          <span>{blog.likes} likes</span>
+          {user && (
+            <ActionButton type="button" onClick={() => onLike(blog)}>
+              like
+            </ActionButton>
+          )}
+        </LikesInfo>
+
+        {isCreator && (
+          <ButtonGroup>
+            <ActionButton
+              $variant="danger"
+              type="button"
+              onClick={() => onDelete(blog)}
+            >
+              remove
+            </ActionButton>
+          </ButtonGroup>
         )}
-      </LikesSection>
+      </BlogMeta>
 
-      <AuthorSection>Added by {blog.user?.name}</AuthorSection>
-
-      {isCreator && (
-        <ButtonGroup>
-          <ActionButton
-            variant="danger"
-            type="button"
-            onClick={() => onDelete(blog)}
-          >
-            remove
-          </ActionButton>
-        </ButtonGroup>
-      )}
+      <AuthorSection>
+        Added by {blog.user?.name || blog.user?.username}
+      </AuthorSection>
     </BlogContainer>
   );
 }

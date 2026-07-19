@@ -21,53 +21,79 @@ const Container = styled.div`
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  padding: 20px;
+  // padding: 5px;
   max-width: 900px;
   margin: 0 auto;
 `;
 
 const Nav = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 16px 24px;
+  background-color: #1976d2;
+  padding: 0px 24px;
+  min-height: 64px;
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  border-radius: 0px;
+  box-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14);
+`;
 
-  a,
-  button {
-    color: white;
-    text-decoration: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.3px;
-    transition: all 0.3s ease;
+const NavBrand = styled.div`
+  color: white;
+  font-size: 20px;
+  font-weight: 500;
+  font-family: sans-serif;
+  text-decoration: none;
+`;
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
+const NavLinks = styled.div`
+  display: flex;
+  gap: 24px;
+  align-items: center;
+`;
 
-    &:active {
-      transform: translateY(0);
-    }
+const NavLink = styled(Link)`
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease,
+    text-shadow 0.2s ease;
+
+  &:hover {
+    color: #e3f2fd;
+    transform: translateY(-1px);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.12);
   }
+`;
 
-  button {
-    background: rgba(255, 255, 255, 0.15);
-    margin-left: auto;
-    margin-right: 0;
-  }
+const NavButton = styled.button`
+  color: white;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease,
+    text-shadow 0.2s ease;
 
-  button:hover {
-    background: rgba(255, 255, 255, 0.3);
+  &:hover {
+    color: #e3f2fd;
+    transform: translateY(-1px);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.12);
   }
 `;
 
@@ -306,20 +332,21 @@ const App = () => {
 
   return (
     <Container>
-      {/* 1. Standard Navigation Bar */}
       <Nav>
-        <Link to="/">blogs</Link>
-        {user ? (
-          <>
-            <Link to="/create">new blog</Link>
-            <button onClick={handleLogout}>logout</button>
-          </>
-        ) : (
-          <Link to="/login">login</Link>
-        )}
+        <NavBrand>Blog App</NavBrand>
+        <NavLinks>
+          <NavLink to="/">blogs</NavLink>
+          {user ? (
+            <>
+              <NavLink to="/create">new blog</NavLink>
+              <NavButton onClick={handleLogout}>logout</NavButton>
+            </>
+          ) : (
+            <NavLink to="/login">login</NavLink>
+          )}
+        </NavLinks>
       </Nav>
 
-      <Heading>blogs</Heading>
       <Notification message={notification} type={notificationType} />
 
       <Routes>
