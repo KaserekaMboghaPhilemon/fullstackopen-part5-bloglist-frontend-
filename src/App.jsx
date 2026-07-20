@@ -9,7 +9,6 @@ import {
 } from "react-router-dom";
 import styled from "styled-components";
 import Blog from "./components/Blog";
-import BlogView from "./components/BlogView";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Notification from "./components/Notification";
@@ -198,6 +197,76 @@ const BlogList = styled.ul`
   }
 `;
 
+const BlogCard = styled.div`
+  width: 100%;
+  max-width: 600px;
+  margin: 20px 0;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+`;
+
+const BlogTitle = styled.h2`
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 0 8px;
+  color: #111;
+`;
+
+const BlogAuthorLine = styled.p`
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 12px;
+`;
+
+const BlogUrlLink = styled.a`
+  display: block;
+  color: #1976d2;
+  text-decoration: underline;
+  margin-bottom: 8px;
+`;
+
+const AddedByLine = styled.span`
+  display: block;
+  color: #555;
+  margin-bottom: 16px;
+`;
+
+const ActionRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const LikesText = styled.span`
+  font-weight: 600;
+  color: #111;
+`;
+
+const LikeButton = styled.button`
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid #90caf9;
+  background: #ffffff;
+  color: #1976d2;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+`;
+
+const RemoveButton = styled.button`
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid #ef9a9a;
+  background: #ffffff;
+  color: #d32f2f;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+`;
+
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState("");
@@ -330,6 +399,16 @@ const App = () => {
     ? blogs.find((b) => b.id === match.params.id)
     : null;
 
+  const isCreator =
+    user &&
+    matchedBlog &&
+    ((matchedBlog.user &&
+      typeof matchedBlog.user === "object" &&
+      matchedBlog.user.username === user.username) ||
+      (typeof matchedBlog.user === "string" && matchedBlog.user === user.id) ||
+      (typeof matchedBlog.user === "string" &&
+        matchedBlog.user === user.username));
+
   return (
     <Container>
       <Nav>
@@ -355,6 +434,7 @@ const App = () => {
           path="/"
           element={
             <div>
+              <Heading>Blogs</Heading>
               <BlogList>
                 {blogs.map((blog) => (
                   <li key={blog.id}>
@@ -389,12 +469,41 @@ const App = () => {
           path="/blogs/:id"
           element={
             matchedBlog ? (
-              <BlogView
-                blog={matchedBlog}
-                user={user}
-                onLike={handleLike}
-                onDelete={handleRemove}
-              />
+              <BlogCard>
+                <BlogTitle>{matchedBlog.title}</BlogTitle>
+                <BlogAuthorLine>by {matchedBlog.author}</BlogAuthorLine>
+                <BlogUrlLink
+                  href={matchedBlog.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {matchedBlog.url}
+                </BlogUrlLink>
+                <AddedByLine>
+                  Added by{" "}
+                  {matchedBlog.user?.name || matchedBlog.user?.username}
+                </AddedByLine>
+
+                <ActionRow>
+                  <LikesText>likes {matchedBlog.likes}</LikesText>
+                  {user && (
+                    <LikeButton
+                      type="button"
+                      onClick={() => handleLike(matchedBlog)}
+                    >
+                      like
+                    </LikeButton>
+                  )}
+                  {isCreator && (
+                    <RemoveButton
+                      type="button"
+                      onClick={() => handleRemove(matchedBlog)}
+                    >
+                      remove
+                    </RemoveButton>
+                  )}
+                </ActionRow>
+              </BlogCard>
             ) : (
               <p>Blog not found</p>
             )

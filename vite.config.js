@@ -10,6 +10,8 @@ export default defineConfig({
     globals: true,
   },
   server: {
+    host: "127.0.0.1",
+    port: 5174,
     // Configure the Vite dev server to proxy API requests to the backend
     proxy: {
       // When frontend makes requests to /api/*, forward them to the backend on port 3003
